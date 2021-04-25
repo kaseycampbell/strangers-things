@@ -1,0 +1,189 @@
+@import url("https://fonts.googleapis.com/css?family=Parisienne|Roboto|Playfair+Display|Roboto+Condensed&display=swap");
+
+* {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 1fr 600px;
+  grid-template-rows: auto auto 1fr;
+  gap: 8px;
+
+  height: 100%;
+  width: 100%;
+
+  background: #001f3f;
+}
+
+#title {
+  grid-row: 1;
+  background-color: goldenrod;
+  grid-column: 1 / -1;
+  padding: 8px;
+  text-align: center;
+  color: white;
+}
+
+#title h1 {
+  font-family: "Parisienne", cursive;
+  font-size: 3.2rem;
+}
+
+#search {
+  grid-row: 2;
+  grid-column: 1 / 2;
+
+  padding: 8px;
+
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(1fr, 300px) 240px 240px 100px;
+
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 16px;
+
+  background: #ccc;
+  border-bottom: 1px solid black;
+}
+
+#auth_form {
+  grid-row: 2;
+  grid-column: 2 / -1;
+
+  padding: 8px;
+
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 16px;
+
+  background: #ccc;
+  border-bottom: 1px solid black;
+}
+
+#search fieldset,
+#auth_form fieldset {
+  display: flex;
+  flex-direction: column;
+}
+
+#search fieldset label,
+#auth_form fieldset label {
+  margin-bottom: 0.5em;
+  font-size: 1.2em;
+}
+
+#search fieldset label span,
+#auth_form fieldset label span {
+  margin-bottom: 0.5em;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: maroon;
+  margin-left: 4px;
+}
+
+#search select,
+#auth_form select {
+  padding: 4px;
+  width: 100%;
+  height: 32px;
+
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 1em;
+  font-weight: 700;
+
+  background: #fff;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+#search option {
+  font-weight: normal;
+}
+
+#search input,
+#search button,
+#auth_form button,
+#auth_form input {
+  padding: 4px 8px;
+  width: 100%;
+  height: 32px;
+
+  font-size: 1em;
+
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+#search button,
+#auth_form button {
+  align-self: flex-end;
+  background-color: #001f3f;
+  color: white;
+  cursor: pointer;
+}
+
+.user-status {
+  position: fixed;
+  top: 55px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background-color: pink;
+  grid-column: 1/ -1;
+  grid-row: 2;
+}
+
+.user-status button {
+  border: solid white 2px;
+  height: 30px;
+  width: 100px;
+  margin: 5px 10px 5px;
+}
+
+.logout:not(.in) {
+  display: none;
+}
+
+.in {
+  border: solid white 2px;
+  height: 30px;
+  width: 120px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.myMessages:not(.in) {
+  display: none;
+}
+
+.myPosts:not(.in) {
+  display: none;
+}
+
+#preview,
+#feature {
+  font-family: "Playfair Display", serif;
+}
+
+#posts_container {
+  grid-column: 1;
+  grid-row: 3;
+
+  background: #eee;
+  overflow-y: scroll;
+}
+
+a {
+  color: black;
+}
+
+a:hover {
+  color: maroon;
+}
