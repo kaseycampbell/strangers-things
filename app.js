@@ -3,13 +3,20 @@ const BASE_URL =
 const POSTS_URL =
   "https://strangers-things.herokuapp.com/api/2101-vpi-rm-web-pt/posts";
 const LOGIN_URL =
-  "https://strangers-things.herokuapp.com/api/2101-vpi-rm-web-pt/posts/users/login";
+  "https://strangers-things.herokuapp.com/api/2101-vpi-rm-web-pt/users/login";
 const REGISTER_URL =
-  "https://strangers-things.herokuapp.com/api/2101-vpi-rm-web-pt/posts/users/register";
+  "https://strangers-things.herokuapp.com/api/2101-vpi-rm-web-pt/users/register";
 
-const token = localStorage.getItem("token");
+let token = localStorage.getItem("token");
 
 const state = { posts: [], matches: [], page: true };
+
+window.auth_state = {
+  currentUserObj: null,
+  currentUser: localStorage.getItem("currentUser"),
+  currentForm: "login",
+  authError: null,
+};
 
 function fetchData(url) {
   return fetch(url)
@@ -25,10 +32,10 @@ function fetchPosts() {
   return fetchData(`${POSTS_URL}`);
 }
 
-function renderPosts(post) {
+function renderPost(post) {
+  const displayName = post.author.username;
   if (location === "[On Request]" || location === "")
     location = "Available on request.";
-  const displayName = username ? username : post.author.username;
   return $(`
 <div class="post">
   <h3 class="title">
@@ -42,27 +49,20 @@ function renderPosts(post) {
   <span class="loc">${post.location}</span>
     <span class="delivery">Delivery Available:${
       post.willDeliver ? "Yes" : "No"
-    }</span>}
+    }</span>
 </div>
 `).data("post", post);
 }
 
-function renderPostList(post) {
+function renderPostList(posts) {
   const postListHere = $("#posts_container");
   postListHere.empty();
-  post.forEach(function (post) {
-    postListHere.append(renderPosts(post));
+  posts.forEach(function (post) {
+    postListHere.append(renderPost(post));
   });
 }
 
 const authForm = $("#auth_form");
-
-window.auth_state = {
-  currentUserObj: null,
-  currentUser: localStorage.getItem("currentUser"),
-  currentForm: "login",
-  authError: null,
-};
 
 function renderToggleForm() {
   const { currentForm, authError } = window.auth_state;
@@ -139,6 +139,10 @@ function renderLogoutButton() {
   logoutButton.click(function () {
     localStorage.removeItem("token");
     localStorage.removeItem("currentUser");
+
+    token = null;
+    window.auth_state.currentUser = null;
+
     appendAuthForm();
   });
 
@@ -160,14 +164,16 @@ function loginUser(username, password) {
   })
     .then((response) => response.json())
     .then((result) => {
+      console.log(result);
       if (result.error) {
         window.auth_state.authError = result.error.message;
         return;
       }
-      const token = result.data.token;
-      localStorage.setItem("token", token);
+      const _token = result.data.token;
+      localStorage.setItem("token", _token);
       localStorage.setItem("currentUser", username);
       window.auth_state.currentUser = username;
+      token = _token;
 
       return result;
     })
@@ -189,14 +195,16 @@ function registerUser(username, password) {
   })
     .then((response) => response.json())
     .then((result) => {
+      console.log(result);
       if (result.error) {
         window.auth_state.authError = result.error.message;
         return;
       }
-      const token = result.data.token;
-      localStorage.setItem("token", token);
+      const _token = result.data.token;
+      localStorage.setItem("token", _token);
       localStorage.setItem("currentUser", username);
       window.auth_state.currentUser = username;
+      token = _token;
 
       return result;
     })
@@ -250,8 +258,109 @@ function renderAuthForm() {
   return renderToggleForm();
 }
 
-function bootstrap() {
-  fetchPosts().then(renderPostList);
+function screenRefresh(posts) {
+  $("#posts_container").empty();
+  posts.forEach((post) => {
+    $("#posts_container").prepend(renderPost(post));
+  });
+}
+
+$(".search").click(async (event) => {
+  event.preventDefault();
+
+  const searchValue = $(".searchForm").val();
+  const searchForm = $(".searchForm");
+
+  if (!searchValue) {
+    screenRefresh(state.posts);
+    return;
+  }
+  const searchTerms = searchValue.toLowerCase().split(" ");
+
+  const matches = state.posts.filter((postObj) => {
+    const titleWords = postObj.title.toLowerCase();
+    const bodyWords = postObj.description.toLowerCase();
+    const priceWords = postObj.price.toLowerCase();
+
+    const titleMatch = searchTerms.some((searchTerm) => {
+      return titleWords.includes(searchTerm);
+    });
+    const bodyMatch = searchTerms.some((searchTerm) => {
+      return bodyWords.includes(searchTerm);
+    });
+    const priceMatch = searchTerms.some((searchTerm) => {
+      return priceWords.includes(searchTerm);
+    });
+
+    const isMatch = titleMatch + bodyMatch + priceMatch;
+    return isMatch;
+  });
+  screenRefresh(matches);
+  searchForm.trigger("reset");
+});
+
+async function createPost(post) {
+  try {
+    const response = await fetch(POSTS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(post),
+    });
+    const newPost = await response.json();
+    console.log(newPost);
+    return newPost;
+  } catch (error) {
+    throw error;
+  }
+}
+
+$("#post-form").on("submit", async (event) => {
+  event.preventDefault();
+  let delivery;
+  if ($("#delivery").val() === "Yes") {
+    delivery = true;
+  } else {
+    delivery = false;
+  }
+  const newPosting = {
+    post: {
+      title: $("#create-title").val(),
+      description: $("#create-description").val(),
+      price: $("#create-price").val(),
+      location: $("#create-location").val(),
+      willDeliver: delivery,
+    },
+  };
+  await createPost(newPosting);
+  bootstrap();
+});
+
+async function deletePost(postId) {
+  try {
+    const url = `${POSTS_URL}/${postId}`;
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function bootstrap() {
+  const hopefulPosts = await fetchPosts();
+  console.log(hopefulPosts);
+  console.log(hopefulPosts.data);
+  renderPostList(hopefulPosts.data.posts);
 }
 
 bootstrap();

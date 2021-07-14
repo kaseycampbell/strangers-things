@@ -12,13 +12,32 @@
         <h1>Stranger's Things</h1>
       </div>
       <form id="search">
-        <fieldset>
+        <fieldset class="searchForm">
           <label for="keywords">Search</label>
           <input id="keywords" type="text" placeholder="enter keywords..." />
         </fieldset>
-        <button>SEARCH</button>
+        <button class="search">SEARCH</button>
       </form>
       <div id="auth_form"></div>
+      <div id="userActions">
+          <div class="create-post-form">
+            <form name ="create-post-form" action="" id="post-form" >
+              <h3>Create Post</h3>
+              <input id="create-title"type="text" placeholder="Title" />
+              <input id="create-price"type="text" placeholder="Price" />
+              <input id="create-description"type="text" placeholder="Description" />
+              <input id="create-location"type="text" placeholder="Location" />
+              <label for="Delivery">Delivery Available?</label>
+              <select name="Delivery" id="delivery" form="post-form">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+              <br />
+              <br />
+              <button  class="create-post-btn" >Submit</button>
+            </form>
+          </div>
+      </div>
       <div id="posts_container"></div>
     </div>
   </body>
